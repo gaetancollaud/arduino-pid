@@ -15,13 +15,22 @@ public:
 	void reset();
 
 private:
-	double kp; // * (P)roportional Tuning Parameter
-	double ki; // * (I)ntegral Tuning Parameter
-	double kd; // * (D)erivative Tuning Parameter
+	/**
+	 * (P)roportional Tuning Parameter
+     */
+	double kp;
+	/**
+	 * (I)ntegral Tuning Parameter
+	 */
+	double ki;
+	/**
+	 * (D)erivative Tuning Parameter
+	 */
+	double kd;
 
-	unsigned long lastTime;
 	double lastInput;
-	double integral, lastError;
+	double integral;
+	double lastError;
 
 	double outMin, outMax;
 };
