@@ -2,6 +2,7 @@
 
 #define ENCODER_A 2
 #define ENCODER_B 3
+#define ENCODER_TICKS 160
 
 #define MOTOR_DIR 12
 #define MOTOR_PWM 11
@@ -10,13 +11,13 @@
 
 #define PIN_ENABLE 4
 
-#define PID_P 10
-#define PID_I 10
-#define PID_D 0.001
+#define PID_P 0.1
+#define PID_I 5
+#define PID_D 0.00
 
 #define PID_DELAY 50
 
-double targetAngle = 360;
+double targetSpeed = 360.0; // degr/sec
 
 int encoderPos = 0;
 unsigned long lastTime;
@@ -43,29 +44,39 @@ void loop() {
 
   unsigned long now = millis();
 
+
+  targetSpeed = digitalRead(PIN_ENABLE)==HIGH ? 600 : 0;
+
   if(now>=nextPidRUn){
     nextPidRUn += PID_DELAY;
-    double dtS=(now-lastTime)/1000.0;
-    double angle = getAngle();
-    double speed = pid.compute(angle, targetAngle, dtS);
-    applySpeed(speed);
-    Serial.print("\tencoderPos=");
+    double dtS=((double)(now-lastTime))/1000.0;
+    Serial.print("encoderPos=");
     Serial.print(encoderPos);
-    Serial.print("\tangle=");
-    Serial.print((int)angle);
-    Serial.print("\t speed=");
-    Serial.println(speed);
+    double currentSpeed = (int)getAngularSpeed(dtS);
+    double torque = pid.compute(currentSpeed, targetSpeed, dtS);
+    //double torque = (targetSpeed-currentSpeed)*0.1;
+    applySpeed(torque);
+    Serial.print("\ttargetSpeed=");
+    Serial.print((int)targetSpeed);
+    Serial.print("\tcurrentSpeed=");
+    Serial.print((int)currentSpeed);
+    Serial.print("\t torque=");
+    Serial.println(torque);
+
+    lastTime = now;
   }
 
-  lastTime = now;
 }
 
-double getAngle(){
-  return ((double)encoderPos)/158.0*360.0;
+double getAngularSpeed(double dt){
+  double diffA = ((double)encoderPos)/ENCODER_TICKS*360.0;
+  encoderPos = 0;
+  return diffA/dt;
 }
 
 void applySpeed(double speed){
-  if(digitalRead(PIN_ENABLE)==HIGH){
+  //if(digitalRead(PIN_ENABLE)==HIGH){
+  if(true){
     bool forward = speed>0;
     digitalWrite(MOTOR_DIR, forward ? HIGH : LOW);
     int pwm = (int)abs(speed);
