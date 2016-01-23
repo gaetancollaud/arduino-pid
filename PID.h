@@ -6,8 +6,13 @@ public:
 
 	PID(double kp, double ki, double kd);
 
+  /**
+	* @param input the current position
+	* @param setPoint the target position
+	* @dt the delta time in second
+	*/
 	double compute(double input, double setPoint, double dt);
-	
+
 	void setLimits(double min, double max);
 
 	void tune(double kp, double ki, double kd);
@@ -35,4 +40,3 @@ private:
 	double outMin, outMax;
 };
 #endif
-
